@@ -61,7 +61,7 @@ class UpdateIn(BaseModel):
     jurisdiction: Literal["UK", "US", "EU", "IN", "SG", "AU"]
     category: Literal["Rule change", "Consultation", "Guidance", "Enforcement"]
     published_date: date
-    summary: Optional[str] = Field(default=None, max_length=2000)
+    summary: str = Field(min_length=5, max_length=2000)
 
 
 def insert_update(u: UpdateIn) -> int:
@@ -265,7 +265,7 @@ def submit_form(
             jurisdiction=jurisdiction,
             category=category,
             published_date=published_date,
-            summary=summary or None,
+            summary=summary.strip(),
         )
     except ValidationError as e:
         first = e.errors()[0]

@@ -42,10 +42,10 @@ def test_filter_by_jurisdiction(page: Page):
     sg_title = unique_title("MAS notice")
 
     form = NewUpdatePage(page)
-    form.create(uk_title, "UK", "Guidance", "2026-11-20")
+    form.create(uk_title, "UK", "Guidance", "2026-11-20", "FCA guidance on fair value")
     expect(HomePage(page).success_banner).to_be_visible()
 
-    form.create(sg_title, "SG", "Consultation", "2026-11-20")
+    form.create(sg_title, "SG", "Consultation", "2026-11-20", "MAS consultation on AML")
     expect(HomePage(page).success_banner).to_be_visible()
     home = HomePage(page)
     home.open()
