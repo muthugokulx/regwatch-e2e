@@ -1,6 +1,8 @@
 """Fill regwatch.db with practice data for SQL learning.
 
-Run from the project root:   python scripts/seed_data.py
+Run from the project root:
+    python scripts/seed_data.py           # practice data WITH planted bugs (for learning)
+    python scripts/seed_data.py --clean   # clean data, no bugs (used by CI)
 
 Creates / refills 3 tables:
   regulatory_updates  - the app's main table (30 rows, some with planted data problems)
@@ -19,6 +21,8 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app.main import DB_PATH, init_db  # noqa: E402
+
+CLEAN = "--clean" in sys.argv
 
 init_db()
 conn = sqlite3.connect(DB_PATH)
@@ -93,6 +97,11 @@ updates = [
     ("Unknown regulator bulletin", "XX", "Guidance", "2026-10-28", "Bad jurisdiction code from import"),  # BAD CODE
     ("Crypto custody rules", "SG", "Rule change", "2026-11-05", "Safeguarding customer crypto assets"),
 ]
+if CLEAN:
+    updates = [u for u in updates if u[1] != "XX"]                      # drop bad code
+    updates = list(dict.fromkeys(updates))                               # drop duplicate
+    updates = [(t, j, c, d, s or "Summary pending from regulator") for t, j, c, d, s in updates]
+
 cur.executemany(
     "INSERT INTO regulatory_updates "
     "(title, jurisdiction, category, published_date, summary, created_at) "
@@ -114,7 +123,8 @@ for update_id in range(1, 25):  # updates 25-30 have no review yet
             None if statuses[update_id % 5] == "Pending" else f"2026-11-{(update_id % 18) + 1:02d}",
         )
     )
-reviews.append((999, "Arjun", "Approved", "High", "2026-11-10"))  # ORPHAN: update 999 does not exist
+if not CLEAN:
+    reviews.append((999, "Arjun", "Approved", "High", "2026-11-10"))  # ORPHAN: update 999 does not exist
 cur.executemany(
     "INSERT INTO reviews (update_id, reviewer, status, risk_level, reviewed_at) VALUES (?, ?, ?, ?, ?)",
     reviews,
