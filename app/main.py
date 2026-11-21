@@ -8,6 +8,7 @@ Layers you will test:
 import html
 import os
 import sqlite3
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 from contextlib import contextmanager
 from datetime import date, datetime, timezone
 from typing import Literal, Optional
@@ -56,12 +57,15 @@ init_db()
 
 
 # ---------------------------------------------------------------- models
+
+
 class UpdateIn(BaseModel):
     title: str = Field(min_length=3, max_length=200)
     jurisdiction: Literal["UK", "US", "EU", "IN", "SG", "AU"]
     category: Literal["Rule change", "Consultation", "Guidance", "Enforcement"]
     published_date: date
     summary: str = Field(min_length=5, max_length=2000)
+    model_config = ConfigDict(str_strip_whitespace=True)  
 
 
 def insert_update(u: UpdateIn) -> int:

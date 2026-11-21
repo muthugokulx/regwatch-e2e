@@ -86,6 +86,8 @@ def test_create_with_wrong_api_key_returns_401(api_url):
         ("title", "ab"),
         ("published_date", "20-11-2026"),
         ("summary", ""),
+        ("title", "     "),
+        ("title", "a  "),
     ],
 )
 def test_create_with_invalid_field_returns_422(api_url, auth_headers, field, bad_value):
